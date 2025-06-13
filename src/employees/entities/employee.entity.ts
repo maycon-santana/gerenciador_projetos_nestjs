@@ -1,15 +1,17 @@
+import { Address } from "src/addresses/entities/address.entity";
 import { Project } from "src/projects/entities/project.entity";
 import { 
     Column, 
     CreateDateColumn, 
     Entity, 
-    OneToMany, 
+    ManyToMany, 
+    OneToOne, 
     PrimaryGeneratedColumn, 
     UpdateDateColumn 
 } from "typeorm";
 
 @Entity()
-export class Client {
+export class Employee {
 
     @PrimaryGeneratedColumn('increment')
     id: number;
@@ -18,13 +20,25 @@ export class Client {
     nome: string;
 
     @Column({ nullable: false })
-    endereco: string;
+    cpf: string;
+
+    @Column({ 
+        type: 'timestamp', 
+        default: () => 'CURRENT_TIMESTAMP(6)', 
+        nullable: false 
+    })
+    dataContratacao: Date;
 
     @Column({ nullable: true })
-    observacao?: string;
+    dataDemissao?: Date;
 
-    @OneToMany(() => Project, (project) => project.client, { cascade: true })
-    projects: Project[];
+    @OneToOne(() => Address, (address) => address.employee, {
+        cascade: true, onDelete: 'CASCADE'
+    })
+    address: Address;
+
+    @ManyToMany(() => Project, (project) => project.employee)
+    projects: Project[]
 
     @CreateDateColumn({
         type: 'timestamp', 
@@ -32,7 +46,7 @@ export class Client {
     })
     createdAt: Date;
 
-     @UpdateDateColumn({
+    @UpdateDateColumn({
         type: 'timestamp', 
         default: () => 'CURRENT_TIMESTAMP(6)',
         onUpdate: 'CURRENT_TIMESTAMP(6)',
